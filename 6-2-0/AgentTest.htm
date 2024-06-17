@@ -1,0 +1,534 @@
+<html>
+  <head>
+    <title>Browser Agent API</title>
+    <link rel="icon" type="image/x-icon" href="../resources/favicon.ico" />
+    <script type="text/javascript" src="./setValues.js"></script>
+    <style>
+      body {
+        font-family: Sans-serif;
+        margin: 0 0 0 0;
+        font-size: 21px;
+      }
+      header {
+        background: #33aae1;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 10px 10px;
+      }
+
+      #form-box {
+        position: relative;
+      }
+
+      #eventsList {
+        font-family: monospace;
+        padding: 0 20px 0 20px;
+        display: block;
+        font-size: 12px;
+        overflow-x: hidden;
+      }
+
+      #auth-box {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .credential {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #presence-box {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #join-box {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #waiting-box {
+        display: none;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .started-box {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #ended-box {
+        display: none;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #timedout-box {
+        display: none;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      input[type="text"] {
+        border: 1px solid black;
+        border-radius: 6px;
+        padding: 8px 12px;
+        color: black;
+        font-size: 16px;
+        box-shadow: none;
+        width: 150px;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      input[type="button"] {
+        background: #1f4984;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 12px;
+        color: white;
+        font-size: 16px;
+        box-shadow: none;
+        width: 100px;
+      }
+
+      input[type="button"]:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .waiting {
+        background: url(../img/loader.gif) no-repeat; /* same as Waiting.gif but workaround IE bug where animated gif stops */
+        background-size: 33px 33px;
+        width: 33px;
+        height: 33px;
+      }
+
+      @-webkit-keyframes orangePulse {
+        from {
+          background-color: #f46802;
+          -webkit-box-shadow: 0 0 7px #d15902;
+        }
+        50% {
+          background-color: #d15902;
+          -webkit-box-shadow: 0 0 10px #d15902;
+        }
+        to {
+          background-color: #f46802;
+          -webkit-box-shadow: 0 0 7px #d15902;
+        }
+      }
+
+      .present {
+        -webkit-animation-name: orangePulse;
+        -webkit-animation-duration: 2s;
+        -webkit-animation-iteration-count: infinite;
+      }
+    </style>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://www.glance.net/agentjoin/js/GlanceAgentM.js"></script>
+
+    <script>
+      function displayJoinForm() {
+        $("#waiting-box").hide();
+        $("#join-box").css("display", "flex");
+        $("#started-box").hide();
+        $("#timedout-box").hide();
+      }
+
+      function displayWaitingForGuest() {
+        $("#join-box").hide();
+        $("#waiting-box").css("display", "flex");
+      }
+
+      function displayStarted() {
+        $("#join-box").css("display", "flex");
+        $("#waiting-box").hide();
+        $(".started-box").css("display", "flex");
+      }
+
+      function displayEnded() {
+        $("#join-box").css("display", "flex");
+        $("#waiting-box").hide();
+        $("#ended-box").css("display", "flex");
+      }
+
+      function displayTimedOut() {
+        $("#join-box").css("display", "flex");
+        $("#waiting-box").hide();
+        $("#started-box").hide();
+        $("#timedout-box").css("display", "flex");
+      }
+
+      function displayWaitingForPresence() {
+        document.getElementById("session-code").style.display = "none";
+        document.getElementById("session-code-label").style.display = "none";
+        document.getElementById("join-button").value = "Join";
+        document.getElementById("cancel-button").style.display = "block";
+      }
+
+      function displayPresenceConnect() {
+        document.getElementById("session-code").style.display = "block";
+        document.getElementById("session-code-label").style.display = "block";
+        document.getElementById("join-button").value = "Connect";
+      }
+
+      function displayManualEntry() {
+        displayJoinForm();
+        document.getElementById("session-code").style.display = "block";
+        document.getElementById("session-code-label").style.display = "block";
+        document.getElementById("join-button").value = "Join";
+        document.getElementById("cancel-button").style.display = "none";
+      }
+
+      function addStartedBox(viewer) {
+        let ssnkey = $("#session-code").val();
+
+        let startedBox =
+          '<div class="started-box">' +
+          `<label class="start-label" id="end_button_label_${ssnkey}">Session started ${ssnkey}</label>` +
+          `<input type="button" value="Close" class="end-button" id="end_button_${ssnkey}"/>` +
+          "</div>";
+
+        $("#form-box").append(startedBox);
+
+        $(`#end_button_${ssnkey}`).on("click", () => {
+          viewer.close();
+          $(`#end_button_${ssnkey}`).parent().remove();
+        });
+      }
+    </script>
+    <script>
+      let present = false;
+      let viewer = null;
+      GLANCE.Agent.addEventListenerAll(function (name, data) {
+        switch (name) {
+          case "lookupWaiting":
+            break;
+          case "lookupFound":
+            displayStarted();
+            break;
+          case "joinFailed":
+            if (data.reason && data.reason === "timedout") {
+              displayTimedOut();
+            } else {
+              displayJoinForm();
+            }
+            break;
+          case "agentJoined":
+            break;
+          case "sessionStarted":
+            addStartedBox(data);
+            break;
+          case "visitorConnected":
+            if (data.connected) {
+              $("#join-button").addClass("present");
+              $("#join-button").value = "Join";
+              present = true;
+            } else {
+              $("#join-button").removeClass("present");
+              present = false;
+            }
+            break;
+          case "presenceVisibility":
+            console.log("onvisibility", data);
+            break;
+          case "viewerOpened":
+            viewer = data;
+            addStartedBox(data);
+            break;
+            // case 'presenceEndSession':
+            // 	displayManualEntry();
+            //     $('#join-button').removeClass('present');
+            //     present = false;
+            //     setpresence("on");
+            //     break;
+            // case "sessionEnded":
+            //   console.log("sessionEnded:", data);
+            //   break;
+            // case "videoEnded":
+            //   console.log("videoEnded:", data);
+            break;
+          default:
+            break;
+        }
+        let d = document.createElement("div");
+        d.className = "event";
+        d.innerText = "Glance event: " + name + ": " + JSON.stringify(data);
+        document.getElementById("eventsList").appendChild(d);
+        console.log(name, data);
+      });
+
+      //   GLANCE.Agent.webserver = window.location.origin; // *** Normally do not pass this argument to openViewer, it defaults to https://www.glance.net.  This is only to make this test page work on various test servers
+      // GLANCE.Agent["postParametersToViewer"] = false;
+      // var windowFeatures = "location=no,menubar=0,titlebar=0,status=0,toolbar=0,height=800,width=800,top=10,left=10,scrollbars=1,resizable=1";  // this is the default
+      let sessioncode = "";
+
+      // Handle user events
+      function join(sessionkey) {
+        if (partnerId && partnerUserId && loginkey) {
+          GLANCE.Agent.authenticate({
+            loginkey: loginkey,
+            partnerid: partnerId,
+            partneruserid: partnerUserId,
+          });
+
+          if (present) {
+            GLANCE.Agent.presenceStartSession(sessionkey);
+          } else if (sessionkey) {
+            if (document.getElementById("presence-switch").checked) {
+              GLANCE.Agent.presenceConnect(sessionkey);
+              displayWaitingForPresence();
+            } else {
+              var params = JSON.parse(
+                $("#params").val() === "" ? "{}" : $("#params").val()
+              );
+              GLANCE.Agent.joinSession(sessionkey, params).then(
+                () => console.log("resolve"),
+                () => console.log("reject")
+              );
+              displayWaitingForGuest();
+            }
+          }
+        }
+      }
+
+      function cancel() {
+        let presenceSwitch = document.getElementById("presence-switch");
+        presenceSwitch.value = "off";
+        presenceSwitch.checked = false;
+        $("#join-button").removeClass("present");
+        present = false;
+        GLANCE.Agent.cancelLookup();
+        displayManualEntry();
+      }
+
+      function started() {}
+
+      function end() {
+        displayEnded();
+        GLANCE.Agent.end();
+      }
+
+      function ok() {
+        displayJoinForm();
+      }
+
+      function updatepartnerid(val) {
+        partnerId = val;
+        GLANCE.Authorization;
+      }
+
+      function updatepartneruserid(val) {
+        partnerUserId = val;
+      }
+
+      function updateloginkey(val) {
+        loginkey = val;
+      }
+
+      function updatesessioncode(val) {
+        sessioncode = val;
+      }
+
+      function setpresence(val) {
+        let presenceSwitch = document.getElementById("presence-switch");
+
+        if (val === "off") {
+          presenceSwitch.value = "on";
+          presenceSwitch.checked = true;
+          displayPresenceConnect();
+        } else {
+          presenceSwitch.value = "off";
+          presenceSwitch.checked = false;
+          displayManualEntry();
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header>Glance Agent Test</header>
+    <div id="form-box">
+      <div id="auth-box">
+        <div id="partnerid-box" class="credential">
+          <label for="ok-timeout-button">partnerid </label>
+          <input
+            type="text"
+            id="partnerid"
+            oninput="updatepartnerid($(this).val())"
+          />
+        </div>
+        <div id="partneruserid-box" class="credential">
+          <label for="ok-timeout-button">partneruserid </label>
+          <input
+            type="text"
+            id="partneruserid"
+            oninput="updatepartneruserid($(this).val())"
+          />
+        </div>
+        <div id="loginkey-box" class="credential">
+          <label for="ok-timeout-button">loginkey </label>
+          <input
+            type="text"
+            id="loginkey"
+            oninput="updateloginkey($(this).val())"
+          />
+        </div>
+      </div>
+      <div id="presence-box">
+        <label for="presence-switch">Presence</label>
+        <input
+          type="radio"
+          id="presence-switch"
+          value="off"
+          onclick="setpresence($(this).val())"
+        />
+      </div>
+      <div class="credential">
+        <label for="params">Parameters: </label>
+        <textarea type="text" id="params"></textarea>
+      </div>
+      <div id="join-box">
+        <label for="session-code" id="session-code-label">Key: </label>
+        <input
+          type="text"
+          id="session-code"
+          oninput="updatesessioncode($(this).val())"
+        />
+        <input
+          type="button"
+          value="Join"
+          id="join-button"
+          onclick="join($('#session-code').val())"
+        />
+        <input
+          type="button"
+          value="Cancel"
+          id="cancel-button"
+          onclick="cancel()"
+          style="display: none"
+        />
+      </div>
+      <div id="waiting-box">
+        <label for="waiting-button">Waiting for guest </label>
+        <div class="waiting"></div>
+        <input
+          type="button"
+          value="Cancel"
+          id="waiting-button"
+          onclick="cancel()"
+        />
+      </div>
+      <template id="session_start_template">
+        <div class="started-box">
+          <label class="start-label" id="end_button_label_n"
+            >Session started
+          </label>
+          <input
+            type="button"
+            value="Close"
+            class="end-button"
+            id="end_button_n"
+          />
+        </div>
+      </template>
+      <div id="ended-box">
+        <label for="ok-button">Session ended </label>
+        <input type="button" value="OK" id="ok-button" onclick="ok()" />
+      </div>
+      <div id="timedout-box">
+        <label for="ok-timeout-button">Timed out </label>
+        <input type="button" value="OK" id="ok-timeout-button" onclick="ok()" />
+      </div>
+    </div>
+
+    <div id="eventsList" class="event"></div>
+    <div
+      id="popupwarning"
+      style="
+        background-color: red;
+        color: white;
+        position: absolute;
+        top: 10px;
+        right: 120px;
+        padding: 20px;
+        font-family: Sans-serif;
+        display: none;
+      "
+    >
+      ^ Popup<br />Blocked
+    </div>
+
+    <script>
+      // Get query string params and authenticate
+      const urlParams = new URLSearchParams(window.location.search);
+      let partnerId = urlParams.get("partnerid");
+      if (partnerId)
+        document.getElementById("partnerid-box").style.display = "none";
+      let partnerUserId = urlParams.get("partneruserid");
+      if (partnerUserId)
+        document.getElementById("partneruserid-box").style.display = "none";
+      let loginkey = urlParams.get("loginkey");
+      if (loginkey)
+        document.getElementById("loginkey-box").style.display = "none";
+    </script>
+  </body>
+</html>
