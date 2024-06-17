@@ -1,0 +1,788 @@
+<!-- saved from url=(0065)https://storage.glancecdn.net/agent/samples/6_25_0/AgentTest.html -->
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
+    <style>
+      body {
+        font-family: Sans-serif;
+        margin: 0 0 0 0;
+        font-size: 21px;
+      }
+      header {
+        background: #33aae1;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 10px 10px;
+      }
+
+      #form-box {
+        position: relative;
+      }
+
+      #eventsList {
+        font-family: monospace;
+        padding: 0 20px 0 20px;
+        display: block;
+        font-size: 12px;
+        overflow-x: hidden;
+      }
+
+      #auth-box {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .credential {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #presence-box {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #join-box {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #waiting-box {
+        display: none;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .started-box {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #ended-box {
+        display: none;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      #timedout-box {
+        display: none;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 400px;
+        box-sizing: border-box;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      input[type="text"] {
+        border: 1px solid black;
+        border-radius: 6px;
+        padding: 8px 12px;
+        color: black;
+        font-size: 16px;
+        box-shadow: none;
+        width: 150px;
+      }
+
+      input[type="text"]:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      input[type="button"] {
+        background: #1f4984;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 12px;
+        color: white;
+        font-size: 16px;
+        box-shadow: none;
+        width: 100px;
+      }
+
+      input[type="button"]:focus {
+        outline: none;
+        box-shadow: none;
+      }
+
+      .waiting {
+        background: url(loader.gif) no-repeat; /* same as Waiting.gif but workaround IE bug where animated gif stops */
+        background-size: 33px 33px;
+        width: 33px;
+        height: 33px;
+      }
+
+      @-webkit-keyframes orangePulse {
+        from {
+          background-color: #f46802;
+          -webkit-box-shadow: 0 0 7px #d15902;
+        }
+        50% {
+          background-color: #d15902;
+          -webkit-box-shadow: 0 0 10px #d15902;
+        }
+        to {
+          background-color: #f46802;
+          -webkit-box-shadow: 0 0 7px #d15902;
+        }
+      }
+
+      .present {
+        -webkit-animation-name: orangePulse;
+        -webkit-animation-duration: 2s;
+        -webkit-animation-iteration-count: infinite;
+      }
+    </style>
+    <script
+      src="./AgentTest_files/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script src="./AgentTest_files/GlanceAgent_6.25.0M.js"></script>
+    <script type="text/javascript" src="./setValues.js"></script>
+
+    <script>
+      // Utilities to remember previously used values
+      // credit Joe Belmonte :)
+      function populateValues() {
+        document.getElementById("webserver").value =
+          window.localStorage.getItem("webserver") || "https://www.glance.net";
+
+        document.getElementById("partnerid").value =
+          window.localStorage.getItem("partnerid")
+            ? window.localStorage.getItem("partnerid")
+            : "";
+        document.getElementById("partneruserid").value =
+          window.localStorage.getItem("partneruserid")
+            ? window.localStorage.getItem("partneruserid")
+            : "";
+        document.getElementById("loginkey").value = window.localStorage.getItem(
+          "loginkey"
+        )
+          ? window.localStorage.getItem("loginkey")
+          : "";
+        //document.getElementById("session-code").value = window.localStorage.getItem(
+        //  "session-code"
+        //)
+        //  ? window.localStorage.getItem("session-code")
+        //  : "";
+        updatewebserver(document.getElementById("webserver").value);
+        updatepartnerid(document.getElementById("partnerid").value);
+        updatepartneruserid(document.getElementById("partneruserid").value);
+        updateloginkey(document.getElementById("loginkey").value);
+        updatesessioncode(document.getElementById("session-code").value);
+      }
+
+      function setValuesInStorage() {
+        window.localStorage.setItem(
+          "webserver",
+          document.getElementById("webserver").value
+        );
+        window.localStorage.setItem(
+          "partnerid",
+          document.getElementById("partnerid").value
+        );
+        window.localStorage.setItem(
+          "partneruserid",
+          document.getElementById("partneruserid").value
+        );
+        window.localStorage.setItem(
+          "loginkey",
+          document.getElementById("loginkey").value
+        );
+        //window.localStorage.setItem(
+        //  "session-code",
+        //  document.getElementById("session-code").value
+        //);
+      }
+
+      window.onload = (event) => {
+        populateValues();
+        document
+          .getElementById("webserver")
+          .addEventListener("input", setValuesInStorage);
+        document
+          .getElementById("partnerid")
+          .addEventListener("input", setValuesInStorage);
+        document
+          .getElementById("partneruserid")
+          .addEventListener("input", setValuesInStorage);
+        document
+          .getElementById("loginkey")
+          .addEventListener("input", setValuesInStorage);
+        //document
+        //  .getElementById("session-code")
+        //  .addEventListener("input", setValuesInStorage);
+      };
+    </script>
+
+    <script>
+      function displayJoinForm() {
+        $("#waiting-box").hide();
+        $("#join-box").css("display", "flex");
+        $("#started-box").hide();
+        $("#timedout-box").hide();
+      }
+
+      function displayWaitingForGuest() {
+        $("#join-box").hide();
+        $("#waiting-box").css("display", "flex");
+      }
+
+      function displayStarted() {
+        $("#join-box").css("display", "flex");
+        $("#waiting-box").hide();
+        $(".started-box").css("display", "flex");
+      }
+
+      function displayEnded() {
+        $("#join-box").css("display", "flex");
+        $("#waiting-box").hide();
+        $("#ended-box").css("display", "flex");
+      }
+
+      function displayTimedOut() {
+        $("#join-box").css("display", "flex");
+        $("#waiting-box").hide();
+        $("#started-box").hide();
+        $("#timedout-box").css("display", "flex");
+      }
+
+      function displayWaitingForPresence() {
+        document.getElementById("session-code").style.display = "none";
+        document.getElementById("session-code-label").style.display = "none";
+        document.getElementById("join-button").value = "Join";
+        document.getElementById("cancel-button").style.display = "block";
+      }
+
+      function displayPresenceConnect() {
+        document.getElementById("session-code").style.display = "block";
+        document.getElementById("session-code-label").innerText = "visitorid: ";
+        document.getElementById("session-code-label").style.display = "block";
+        document.getElementById("join-button").value = "Connect";
+      }
+
+      function displayManualEntry() {
+        displayJoinForm();
+        document.getElementById("session-code").style.display = "block";
+        document.getElementById("session-code-label").innerText = "Key: ";
+        document.getElementById("session-code-label").style.display = "block";
+        document.getElementById("join-button").value = "Join";
+        document.getElementById("cancel-button").style.display = "none";
+      }
+
+      function addStartedBox(viewer) {
+        let ssnkey = $("#session-code").val();
+
+        let startedBox =
+          '<div class="started-box">' +
+          `<label class="start-label" id="end_button_label_${ssnkey}">Session started ${ssnkey}</label>` +
+          `<input type="button" value="Close" class="end-button" id="end_button_${ssnkey}"/>` +
+          "</div>";
+
+        $("#form-box").append(startedBox);
+
+        $(`#end_button_${ssnkey}`).on("click", () => {
+          viewer.close();
+          $(`#end_button_${ssnkey}`).parent().remove();
+        });
+      }
+    </script>
+    <script>
+      let present = false;
+      let viewer = null;
+      GLANCE.Agent.addEventListenerAll(function (name, data) {
+        switch (name) {
+          case "lookupWaiting":
+            break;
+          case "lookupFound":
+            displayStarted();
+            break;
+          case "joinFailed":
+            if (data.reason && data.reason === "timedout") {
+              displayTimedOut();
+            } else {
+              displayJoinForm();
+            }
+            break;
+          case "agentJoined":
+            break;
+          case "sessionStarted":
+            addStartedBox(data);
+            break;
+          case "visitorConnected":
+            if (data.connected) {
+              $("#join-button").addClass("present");
+              $("#join-button").value = "Join";
+              present = true;
+            } else {
+              $("#join-button").removeClass("present");
+              present = false;
+            }
+            break;
+          case "presenceVisibility":
+            console.log("onvisibility", data);
+            break;
+          case "viewerOpened":
+            viewer = data;
+            addStartedBox(data);
+            break;
+          // case 'presenceEndSession':
+          // 	displayManualEntry();
+          //     $('#join-button').removeClass('present');
+          //     present = false;
+          //     setpresence("on");
+          //     break;
+          default:
+            break;
+        }
+        let d = document.createElement("div");
+        d.className = "event";
+        d.innerText = "Glance event: " + name + ": " + JSON.stringify(data);
+        document.getElementById("eventsList").appendChild(d);
+        console.log(name, data);
+      });
+
+      // GLANCE.Agent.webserver = window.location.origin; // *** Normally do not pass this argument to openViewer, it defaults to https://www.glance.net.  This is only to make this test page work on various test servers
+      // GLANCE.Agent["postParametersToViewer"] = false;
+      // var windowFeatures = "location=no,menubar=0,titlebar=0,status=0,toolbar=0,height=800,width=800,top=10,left=10,scrollbars=1,resizable=1";  // this is the default
+      let sessioncode = "";
+
+      // Handle user events
+      function join(sessionkey) {
+        if (partnerId && partnerUserId && loginkey) {
+          GLANCE.Agent.authenticate({
+            loginkey: loginkey,
+            partnerid: partnerId,
+            partneruserid: partnerUserId,
+          });
+
+          if (present) {
+            GLANCE.Agent.presenceStartSession(sessionkey);
+          } else if (sessionkey) {
+            if (document.getElementById("presence-switch").checked) {
+              GLANCE.Agent.presenceConnect(sessionkey);
+              displayWaitingForPresence();
+            } else {
+              var params = JSON.parse(
+                $("#params").val() === "" ? "{}" : $("#params").val()
+              );
+              GLANCE.Agent.joinSession(sessionkey, params).then(
+                () => console.log("resolve"),
+                () => console.log("reject")
+              );
+              displayWaitingForGuest();
+            }
+          }
+        }
+      }
+
+      function cancel() {
+        let presenceSwitch = document.getElementById("presence-switch");
+        presenceSwitch.value = "off";
+        presenceSwitch.checked = false;
+        $("#join-button").removeClass("present");
+        present = false;
+        GLANCE.Agent.cancelLookup();
+        displayManualEntry();
+      }
+
+      function started() {}
+
+      function end() {
+        displayEnded();
+        GLANCE.Agent.end();
+      }
+
+      function ok() {
+        displayJoinForm();
+      }
+
+      function updatepartnerid(val) {
+        partnerId = val;
+        GLANCE.Authorization;
+      }
+
+      function updatewebserver(val) {
+        GLANCE.Agent.webserver = val;
+      }
+
+      function updatepartneruserid(val) {
+        partnerUserId = val;
+      }
+
+      function updateloginkey(val) {
+        loginkey = val;
+      }
+
+      function updatesessioncode(val) {
+        sessioncode = val;
+      }
+
+      function setpresence(val) {
+        let presenceSwitch = document.getElementById("presence-switch");
+
+        if (val === "off") {
+          presenceSwitch.value = "on";
+          presenceSwitch.checked = true;
+          displayPresenceConnect();
+        } else {
+          presenceSwitch.value = "off";
+          presenceSwitch.checked = false;
+          displayManualEntry();
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <header>Glance Agent Test</header>
+    <div id="form-box">
+      <div id="auth-box">
+        <div id="webserver-box" class="credential">
+          <label for="ok-timeout-button">webserver </label>
+          <input
+            type="text"
+            style="width: 250px"
+            id="webserver"
+            oninput="updatewebserver($(this).val())"
+          />
+        </div>
+        <div id="partnerid-box" class="credential">
+          <label for="ok-timeout-button">partnerid </label>
+          <input
+            type="text"
+            id="partnerid"
+            oninput="updatepartnerid($(this).val())"
+          />
+        </div>
+        <div id="partneruserid-box" class="credential">
+          <label for="ok-timeout-button">partneruserid </label>
+          <input
+            type="text"
+            id="partneruserid"
+            oninput="updatepartneruserid($(this).val())"
+          />
+        </div>
+        <div id="loginkey-box" class="credential">
+          <label for="ok-timeout-button">loginkey </label>
+          <input
+            type="text"
+            id="loginkey"
+            oninput="updateloginkey($(this).val())"
+          />
+        </div>
+      </div>
+      <div id="presence-box">
+        <label for="presence-switch">Presence</label>
+        <input
+          type="radio"
+          id="presence-switch"
+          value="on"
+          onclick="setpresence($(this).val())"
+        />
+      </div>
+      <div class="credential">
+        <label for="params">Parameters: </label>
+        <textarea type="text" id="params"></textarea>
+      </div>
+      <div id="join-box" style="display: flex">
+        <label for="session-code" id="session-code-label" style="display: none"
+          >visitorid:
+        </label>
+        <input
+          type="text"
+          id="session-code"
+          oninput="updatesessioncode($(this).val())"
+          style="display: none"
+        />
+        <input
+          type="button"
+          value="Join"
+          id="join-button"
+          onclick="join($(&#39;#session-code&#39;).val())"
+          class=""
+        />
+        <input
+          type="button"
+          value="Cancel"
+          id="cancel-button"
+          onclick="cancel()"
+          style="display: block"
+        />
+      </div>
+      <div id="waiting-box" style="display: none">
+        <label for="waiting-button">Waiting for guest </label>
+        <div class="waiting"></div>
+        <input
+          type="button"
+          value="Cancel"
+          id="waiting-button"
+          onclick="cancel()"
+        />
+      </div>
+      <template id="session_start_template"></template>
+      <div id="ended-box">
+        <label for="ok-button">Session ended </label>
+        <input type="button" value="OK" id="ok-button" onclick="ok()" />
+      </div>
+      <div id="timedout-box">
+        <label for="ok-timeout-button">Timed out </label>
+        <input type="button" value="OK" id="ok-timeout-button" onclick="ok()" />
+      </div>
+      <div class="started-box">
+        <label class="start-label" id="end_button_label_example"
+          >Session started example</label
+        ><input
+          type="button"
+          value="Close"
+          class="end-button"
+          id="end_button_example"
+        />
+      </div>
+    </div>
+
+    <div id="eventsList" class="event">
+      <div class="event">
+        Glance event: presenceAuthorized: {"service":"presence"}
+      </div>
+      <div class="event">
+        Glance event: visitorConnected: {"connected":true}
+      </div>
+      <div class="event">
+        Glance event: visitorData:
+        {"direct":"p0001-1.glance.net:443","visitorpresent":"1718665195.0","timestamp":"1718665195.0","visitorid":"example","groupid":"20541","application":"346","platform":"iOS
+        iPhone
+        17.5.1","sessionCapabilities":{"screenshare":{}},"ds":"p0001-1.glance.net/1","directserver":"p0001-1.glance.net","tlsport":5501,"httpsport":443}
+      </div>
+      <div class="event">
+        Glance event: presenceOnTerms: {"status":"displayed"}
+      </div>
+      <div class="event">
+        Glance event: presenceOnTerms: {"status":"displayed"}
+      </div>
+      <div class="event">
+        Glance event: presenceOnTerms: {"status":"accepted"}
+      </div>
+      <div class="event">Glance event: presenceSessionStart: {}</div>
+      <div class="event">
+        Glance event: lookupWaiting: {"service":"agent","ssnkey":"example"}
+      </div>
+      <div class="event">
+        Glance event: lookupWaiting: {"service":"agent","ssnkey":"example"}
+      </div>
+      <div class="event">
+        Glance event: lookupFound:
+        {"service":"agent","id":"198271201","ssnid":"20541.example.376212522","serverip":"52.15.247.229","servername":"s1055.glance.net","personid":"0","grpupid":"20541","passcode":"example","agentjoinurl":"https://www.glance.net/agentjoin/AgentView.aspx?groupid=20541&amp;SessionKey=example&amp;partnerid=20541&amp;partneruserid=Jbelmonte&amp;loginkey=$1$1718742818$f5B2u42qguiVLY-8dAm8Cjgub296vz3X0xAMFrl_Q9c","clientjoinurl":"glancepanorama://agentjoin/www.glance.net/20541/example?calltype=G&amp;username=&amp;partnerid=20541&amp;partneruserid=Jbelmonte&amp;loginkey=$1$1718742818$f5B2u42qguiVLY-8dAm8Cjgub296vz3X0xAMFrl_Q9c","calltype":"G","visitorversion":"6.8.7.0
+        GCD OS=\"iOS iPhone 17.5.1\""}
+      </div>
+      <div class="event">Glance event: viewerOpened: {"service":"agent"}</div>
+      <div class="event">
+        Glance event: connecting:
+        {"groupid":20541,"personid":1162611,"calltype":"G","callid":198271201,"maincid":0,"ssnkey":"example","ssnid":"20541.example.376212522","site":"production","camrestoken":"","agenturl":"https://www.glance.net/screenshare/Viewer.aspx?ssnid=20541.example.376212522&amp;callid=198271201&amp;gserver=s1055.glance.net&amp;guestid=1162611&amp;ver=6.25.0&amp;dpver=1021&amp;cflags=2457792&amp;groupid=20541&amp;options=CONTINUOUS&amp;","agentconnect":true,"ssnconnectinfo":{"serverkey":"$2$fc60367bb446bbe4d8ef362ac911898a","privs":"editaddress:on;
+        cobrowse:on; startss:on; joinss:on; viewvideo:on; video:on;
+        twowayvideo:on; bgblur:off; enablebgagent:on; inviteguest:on;
+        cbguestrc:on; cbguestse:on; visitordocshare:on; docshareagentdl:on;
+        agentdocshare:on; docsharevisitordl:on; navassist:on; cbshow:on;
+        showmonitor:on; showwindow:on; enableocr:on; showbrowser:on; cbview:on;
+        reportproblem:on; accessibility:on; agentaccessibility:on; show:on;
+        rc:on; gestures:on; sb:on; reverse:on; guestrc:on; guestgestures:on;
+        invitevideo:on; keyless:on; giflags:on; encrypt:on; guests:300;
+        cantakerc:on; cangesture:on;
+        agentrole:;personid:1162611;groupid:20541;","agentid":"1162611","username":"joe.demo.glance.net","agentinfo":"{\"username\":\"joe.demo.glance.net\",\"partnerid\":20541,\"partneruserid\":\"Jbelmonte\",\"name\":\"Joe
+        Belmonte\",\"title\":\"Senior Solutions
+        Architect\",\"agentrole\":\"\"}","viewerinfo":"{\"viewerparentorigin\":\"https://www.glancedev1.com,
+        https://www.glance.net\"}"},"viewerparentorigin":"https://www.glancedev1.com,
+        https://www.glance.net","agentscriptver":"","server":"","displayprotocolversion":1021,"callflags":2457792,"visitorversion":"6.8.7.0+GCD+OS%3d%22iOS+iPhone+17.5.1%22","visitorvernum":"6.8.7.0","visitormobile":true,"agentusername":"joe.demo.glance.net","agentinfo":{"username":"joe.demo.glance.net","partnerid":20541,"partneruserid":"Jbelmonte","name":"Joe
+        Belmonte","title":"Senior Solutions
+        Architect","agentrole":""},"webserver":"www.glance.net","scriptserver":"www.glancecdn.net","videoserver":"lb-video.glance.net","guestjoinurl":"https://www.glance.net/guest/?groupid=20541","agentvideo":0,"allownwayvideo":true,"agentdocsharelinks":"[]","agentscreensharelinks":"","agentscreensharelinksv2":"[[{\"name\":\"Espn\",\"url\":\"https://www.espn.com\",\"enabled\":true,\"updated\":\"8/3/2023,
+        4:14:09
+        PM\"}]]","agentfavoriteurls":"[]","agentscreenshareallowedurls":"[{\"url\":\"https://www.bankofamerica.com/*\",\"updated\":\"1/10/2024,
+        3:24:01
+        PM\",\"allowed\":true},{\"url\":\"https://www.espn.com/*\",\"updated\":\"1/10/2024,
+        3:24:21
+        PM\",\"allowed\":true}]","agentscreensharealloweduseragents":"","videooptions":{"small":"{
+        \"width\": 320, \"height\": 180, \"modelID\": \"visitor_sodium_small\"
+        }","large":"{ \"width\": 640, \"height\": 360, \"modelID\":
+        \"visitor_sodium_large\" }","dynamic":"{ \"width\": 640, \"height\": 360
+        }","agentss":""},"agentcredentials":{"partnerid":20541,"partneruserid":"Jbelmonte","loginkey":"$1$1718742818$f5B2u42qguiVLY-8dAm8Cjgub296vz3X0xAMFrl_Q9c"},"service":"screenshare"}
+      </div>
+      <div class="event">
+        Glance event: connected:
+        {"service":"screenshare","groupid":20541,"ssnkey":"example"}
+      </div>
+      <div class="event">
+        Glance event: screen:
+        {"display":{"width":393,"height":852},"view":{"width":347,"height":754},"service":"screenshare"}
+      </div>
+      <div class="event">
+        Glance event: sessionEnded:
+        {"service":"screenshare","ssnid":"20541.example.376212522","ssnkey":"example","groupid":20541,"reason":"AgentLeft"}
+      </div>
+      <div class="event">
+        Glance event: presenceSessionEnd: {"reason":"Session ended by other
+        side"}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"visible"}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"hidden"}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"visible"}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"visible"}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"hidden"}
+      </div>
+      <div class="event">
+        Glance event: visitorConnected: {"connected":false}
+      </div>
+      <div class="event">Glance event: visitorData: {}</div>
+      <div class="event">
+        Glance event: visitorConnected: {"connected":true}
+      </div>
+      <div class="event">
+        Glance event: visitorData:
+        {"direct":"p0028-1.glance.net:443","visitorpresent":"1718666409.0","timestamp":"1718666409.0","visitorid":"example","groupid":"20541","ds":"p0028-1.glance.net/1","directserver":"p0028-1.glance.net","tlsport":5501,"httpsport":443}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"visible"}
+      </div>
+      <div class="event">
+        Glance event: presence:
+        {"url":"https://www.glancedev1.com/joeb/cyv/chooseyourvisitor.html?presence=on&amp;groupid=20541&amp;environment=staging&amp;visitorId=example&amp;website=glance&amp;video=default&amp;autoload=false&amp;selfhost=&amp;additionalGroupIds=&amp;paused=false#","browser":"edge","browserver":126,"platform":"mac","visitorpresent":1718666435}
+      </div>
+      <div class="event">
+        Glance event: presence:
+        {"url":"https://www.glancedev1.com/joeb/cyv/chooseyourvisitor.html?presence=on&amp;groupid=20541&amp;environment=staging&amp;visitorId=example&amp;website=glance&amp;video=default&amp;autoload=false&amp;selfhost=&amp;additionalGroupIds=&amp;paused=false#","browser":"edge","browserver":126,"platform":"mac","visitorpresent":1718666449}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"hidden"}
+      </div>
+      <div class="event">
+        Glance event: visitorConnected: {"connected":false}
+      </div>
+      <div class="event">Glance event: visitorData: {}</div>
+      <div class="event">
+        Glance event: visitorConnected: {"connected":true}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"visible"}
+      </div>
+      <div class="event">
+        Glance event: presence:
+        {"url":"https://www.glancedev1.com/joeb/cyv/chooseyourvisitor.html?presence=on&amp;groupid=20541&amp;environment=staging&amp;visitorId=example&amp;website=glance&amp;video=default&amp;autoload=false&amp;selfhost=&amp;additionalGroupIds=&amp;paused=false#","browser":"edge","browserver":126,"platform":"mac","visitorpresent":1718666481}
+      </div>
+      <div class="event">
+        Glance event: visitorData:
+        {"direct":"p0028-1.glance.net:443","visitorpresent":"1718666481.0","timestamp":"1718666481.0","visitorid":"example","groupid":"20541","ds":"p0028-1.glance.net/1","directserver":"p0028-1.glance.net","tlsport":5501,"httpsport":443}
+      </div>
+      <div class="event">
+        Glance event: presence:
+        {"url":"https://www.glancedev1.com/joeb/cyv/chooseyourvisitor.html?presence=on&amp;groupid=20541&amp;environment=staging&amp;visitorId=example&amp;website=glance&amp;video=default&amp;autoload=false&amp;selfhost=&amp;additionalGroupIds=&amp;paused=false#","browser":"edge","browserver":126,"platform":"mac","visitorpresent":1718666582}
+      </div>
+      <div class="event">
+        Glance event: presence:
+        {"url":"https://www.glancedev1.com/joeb/cyv/chooseyourvisitor.html?presence=on&amp;groupid=20541&amp;environment=staging&amp;visitorId=example&amp;website=glance&amp;video=default&amp;autoload=false&amp;selfhost=&amp;additionalGroupIds=&amp;paused=false#","browser":"edge","browserver":126,"platform":"mac","visitorpresent":1718666587}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"hidden"}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"visible"}
+      </div>
+      <div class="event">
+        Glance event: presence:
+        {"url":"https://www.glancedev1.com/joeb/cyv/chooseyourvisitor.html?presence=on&amp;groupid=20541&amp;environment=staging&amp;visitorId=example&amp;website=glance&amp;video=default&amp;autoload=false&amp;selfhost=&amp;additionalGroupIds=&amp;paused=false#","browser":"edge","browserver":126,"platform":"mac","visitorpresent":1718666593}
+      </div>
+      <div class="event">
+        Glance event: presence:
+        {"url":"https://www.glancedev1.com/joeb/cyv/chooseyourvisitor.html?presence=on&amp;groupid=20541&amp;environment=staging&amp;visitorId=example&amp;website=glance&amp;video=default&amp;autoload=false&amp;selfhost=&amp;additionalGroupIds=&amp;paused=false#","browser":"edge","browserver":126,"platform":"mac","visitorpresent":1718666604}
+      </div>
+      <div class="event">
+        Glance event: presenceVisibility: {"visibility":"hidden"}
+      </div>
+      <div class="event">
+        Glance event: visitorConnected: {"connected":false}
+      </div>
+      <div class="event">Glance event: visitorData: {}</div>
+    </div>
+    <div
+      id="popupwarning"
+      style="
+        background-color: red;
+        color: white;
+        position: absolute;
+        top: 10px;
+        right: 120px;
+        padding: 20px;
+        font-family: Sans-serif;
+        display: none;
+      "
+    >
+      ^ Popup<br />Blocked
+    </div>
+
+    <script>
+      // Get query string params and authenticate
+      const urlParams = new URLSearchParams(window.location.search);
+      let partnerId = urlParams.get("partnerid");
+      if (partnerId)
+        document.getElementById("partnerid-box").style.display = "none";
+      let partnerUserId = urlParams.get("partneruserid");
+      if (partnerUserId)
+        document.getElementById("partneruserid-box").style.display = "none";
+      let loginkey = urlParams.get("loginkey");
+      if (loginkey)
+        document.getElementById("loginkey-box").style.display = "none";
+    </script>
+  </body>
+</html>
