@@ -1,8 +1,7 @@
+<!-- saved from url=(0065)https://storage.glancecdn.net/agent/samples/6_19_0/AgentTest.html -->
 <html>
   <head>
-    <title>Browser Agent API</title>
-    <link rel="icon" type="image/x-icon" href="../resources/favicon.ico" />
-    <script type="text/javascript" src="./setValues.js"></script>
+    <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
     <style>
       body {
         font-family: Sans-serif;
@@ -152,7 +151,7 @@
       }
 
       .waiting {
-        background: url(../img/loader.gif) no-repeat; /* same as Waiting.gif but workaround IE bug where animated gif stops */
+        background: url(loader.gif) no-repeat; /* same as Waiting.gif but workaround IE bug where animated gif stops */
         background-size: 33px 33px;
         width: 33px;
         height: 33px;
@@ -180,11 +179,87 @@
       }
     </style>
     <script
-      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      src="./AgentTest_files/jquery-3.6.0.min.js"
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
       crossorigin="anonymous"
     ></script>
-    <script src="./GlanceAgent_6.2.0M.js"></script>
+    <script src="./AgentTest_files/GlanceAgent_6.19.0M.js"></script>
+    <script type="text/javascript" src="./setValues.js"></script>
+
+    <script>
+      // Utilities to remember previously used values
+      // credit Joe Belmonte :)
+      function populateValues() {
+        document.getElementById("webserver").value =
+          window.localStorage.getItem("webserver") || "https://www.glance.net";
+
+        document.getElementById("partnerid").value =
+          window.localStorage.getItem("partnerid")
+            ? window.localStorage.getItem("partnerid")
+            : "";
+        document.getElementById("partneruserid").value =
+          window.localStorage.getItem("partneruserid")
+            ? window.localStorage.getItem("partneruserid")
+            : "";
+        document.getElementById("loginkey").value = window.localStorage.getItem(
+          "loginkey"
+        )
+          ? window.localStorage.getItem("loginkey")
+          : "";
+        //document.getElementById("session-code").value = window.localStorage.getItem(
+        //  "session-code"
+        //)
+        //  ? window.localStorage.getItem("session-code")
+        //  : "";
+        updatewebserver(document.getElementById("webserver").value);
+        updatepartnerid(document.getElementById("partnerid").value);
+        updatepartneruserid(document.getElementById("partneruserid").value);
+        updateloginkey(document.getElementById("loginkey").value);
+        updatesessioncode(document.getElementById("session-code").value);
+      }
+
+      function setValuesInStorage() {
+        window.localStorage.setItem(
+          "webserver",
+          document.getElementById("webserver").value
+        );
+        window.localStorage.setItem(
+          "partnerid",
+          document.getElementById("partnerid").value
+        );
+        window.localStorage.setItem(
+          "partneruserid",
+          document.getElementById("partneruserid").value
+        );
+        window.localStorage.setItem(
+          "loginkey",
+          document.getElementById("loginkey").value
+        );
+        //window.localStorage.setItem(
+        //  "session-code",
+        //  document.getElementById("session-code").value
+        //);
+      }
+
+      window.onload = (event) => {
+        populateValues();
+        document
+          .getElementById("webserver")
+          .addEventListener("input", setValuesInStorage);
+        document
+          .getElementById("partnerid")
+          .addEventListener("input", setValuesInStorage);
+        document
+          .getElementById("partneruserid")
+          .addEventListener("input", setValuesInStorage);
+        document
+          .getElementById("loginkey")
+          .addEventListener("input", setValuesInStorage);
+        //document
+        //  .getElementById("session-code")
+        //  .addEventListener("input", setValuesInStorage);
+      };
+    </script>
 
     <script>
       function displayJoinForm() {
@@ -227,6 +302,7 @@
 
       function displayPresenceConnect() {
         document.getElementById("session-code").style.display = "block";
+        document.getElementById("session-code-label").innerText = "visitorid: ";
         document.getElementById("session-code-label").style.display = "block";
         document.getElementById("join-button").value = "Connect";
       }
@@ -234,6 +310,7 @@
       function displayManualEntry() {
         displayJoinForm();
         document.getElementById("session-code").style.display = "block";
+        document.getElementById("session-code-label").innerText = "Key: ";
         document.getElementById("session-code-label").style.display = "block";
         document.getElementById("join-button").value = "Join";
         document.getElementById("cancel-button").style.display = "none";
@@ -295,18 +372,12 @@
             viewer = data;
             addStartedBox(data);
             break;
-            // case 'presenceEndSession':
-            // 	displayManualEntry();
-            //     $('#join-button').removeClass('present');
-            //     present = false;
-            //     setpresence("on");
-            //     break;
-            // case "sessionEnded":
-            //   console.log("sessionEnded:", data);
-            //   break;
-            // case "videoEnded":
-            //   console.log("videoEnded:", data);
-            break;
+          // case 'presenceEndSession':
+          // 	displayManualEntry();
+          //     $('#join-button').removeClass('present');
+          //     present = false;
+          //     setpresence("on");
+          //     break;
           default:
             break;
         }
@@ -317,7 +388,7 @@
         console.log(name, data);
       });
 
-      //   GLANCE.Agent.webserver = window.location.origin; // *** Normally do not pass this argument to openViewer, it defaults to https://www.glance.net.  This is only to make this test page work on various test servers
+      // GLANCE.Agent.webserver = window.location.origin; // *** Normally do not pass this argument to openViewer, it defaults to https://www.glance.net.  This is only to make this test page work on various test servers
       // GLANCE.Agent["postParametersToViewer"] = false;
       // var windowFeatures = "location=no,menubar=0,titlebar=0,status=0,toolbar=0,height=800,width=800,top=10,left=10,scrollbars=1,resizable=1";  // this is the default
       let sessioncode = "";
@@ -377,6 +448,10 @@
         GLANCE.Authorization;
       }
 
+      function updatewebserver(val) {
+        GLANCE.Agent.webserver = val;
+      }
+
       function updatepartneruserid(val) {
         partnerUserId = val;
       }
@@ -408,6 +483,15 @@
     <header>Glance Agent Test</header>
     <div id="form-box">
       <div id="auth-box">
+        <div id="webserver-box" class="credential">
+          <label for="ok-timeout-button">webserver </label>
+          <input
+            type="text"
+            style="width: 250px"
+            id="webserver"
+            oninput="updatewebserver($(this).val())"
+          />
+        </div>
         <div id="partnerid-box" class="credential">
           <label for="ok-timeout-button">partnerid </label>
           <input
@@ -457,7 +541,7 @@
           type="button"
           value="Join"
           id="join-button"
-          onclick="join($('#session-code').val())"
+          onclick="join($(&#39;#session-code&#39;).val())"
         />
         <input
           type="button"
@@ -477,19 +561,7 @@
           onclick="cancel()"
         />
       </div>
-      <template id="session_start_template">
-        <div class="started-box">
-          <label class="start-label" id="end_button_label_n"
-            >Session started
-          </label>
-          <input
-            type="button"
-            value="Close"
-            class="end-button"
-            id="end_button_n"
-          />
-        </div>
-      </template>
+      <template id="session_start_template"></template>
       <div id="ended-box">
         <label for="ok-button">Session ended </label>
         <input type="button" value="OK" id="ok-button" onclick="ok()" />
