@@ -184,7 +184,6 @@
       crossorigin="anonymous"
     ></script>
     <script src="./AgentTest_files/GlanceAgent_6.19.0M.js"></script>
-    <script type="text/javascript" src="./setValues.js"></script>
 
     <script>
       // Utilities to remember previously used values
@@ -206,11 +205,10 @@
         )
           ? window.localStorage.getItem("loginkey")
           : "";
-        //document.getElementById("session-code").value = window.localStorage.getItem(
-        //  "session-code"
-        //)
-        //  ? window.localStorage.getItem("session-code")
-        //  : "";
+        document.getElementById("session-code").value =
+          window.localStorage.getItem("session-code")
+            ? window.localStorage.getItem("session-code")
+            : "";
         updatewebserver(document.getElementById("webserver").value);
         updatepartnerid(document.getElementById("partnerid").value);
         updatepartneruserid(document.getElementById("partneruserid").value);
@@ -235,10 +233,10 @@
           "loginkey",
           document.getElementById("loginkey").value
         );
-        //window.localStorage.setItem(
-        //  "session-code",
-        //  document.getElementById("session-code").value
-        //);
+        window.localStorage.setItem(
+          "session-code",
+          document.getElementById("session-code").value
+        );
       }
 
       window.onload = (event) => {
@@ -255,9 +253,9 @@
         document
           .getElementById("loginkey")
           .addEventListener("input", setValuesInStorage);
-        //document
-        //  .getElementById("session-code")
-        //  .addEventListener("input", setValuesInStorage);
+        document
+          .getElementById("session-code")
+          .addEventListener("input", setValuesInStorage);
       };
     </script>
 
@@ -364,9 +362,6 @@
               $("#join-button").removeClass("present");
               present = false;
             }
-            break;
-          case "presenceVisibility":
-            console.log("onvisibility", data);
             break;
           case "viewerOpened":
             viewer = data;

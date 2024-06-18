@@ -1,4 +1,4 @@
-<!-- saved from url=(0065)https://storage.glancecdn.net/agent/samples/6_25_0/AgentTest.html -->
+<!-- saved from url=(0065)https://storage.glancecdn.net/agent/samples/6_19_0/AgentTest.html -->
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=windows-1252" />
@@ -183,14 +183,17 @@
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
       crossorigin="anonymous"
     ></script>
-    <script src="./AgentTest_files/GlanceAgent_6.25.0M.js"></script>
+    <script src="./AgentTest_files/GlanceAgent_6.19.0M.js"></script>
+    <script>
+      GLANCE.Agent.webserver = "https://beta.glance.net";
+    </script>
 
     <script>
       // Utilities to remember previously used values
       // credit Joe Belmonte :)
       function populateValues() {
-        document.getElementById("webserver").value =
-          window.localStorage.getItem("webserver") || "https://www.glance.net";
+        // document.getElementById("webserver").value =
+        //   window.localStorage.getItem("webserver") || "https://www.glance.net";
 
         document.getElementById("partnerid").value =
           window.localStorage.getItem("partnerid")
@@ -209,7 +212,7 @@
           window.localStorage.getItem("session-code")
             ? window.localStorage.getItem("session-code")
             : "";
-        updatewebserver(document.getElementById("webserver").value);
+        // updatewebserver(document.getElementById("webserver").value);
         updatepartnerid(document.getElementById("partnerid").value);
         updatepartneruserid(document.getElementById("partneruserid").value);
         updateloginkey(document.getElementById("loginkey").value);
@@ -217,10 +220,10 @@
       }
 
       function setValuesInStorage() {
-        window.localStorage.setItem(
-          "webserver",
-          document.getElementById("webserver").value
-        );
+        // window.localStorage.setItem(
+        //   "webserver",
+        //   document.getElementById("webserver").value
+        // );
         window.localStorage.setItem(
           "partnerid",
           document.getElementById("partnerid").value
@@ -241,9 +244,9 @@
 
       window.onload = (event) => {
         populateValues();
-        document
-          .getElementById("webserver")
-          .addEventListener("input", setValuesInStorage);
+        // document
+        //   .getElementById("webserver")
+        //   .addEventListener("input", setValuesInStorage);
         document
           .getElementById("partnerid")
           .addEventListener("input", setValuesInStorage);
@@ -443,9 +446,9 @@
         GLANCE.Authorization;
       }
 
-      function updatewebserver(val) {
-        GLANCE.Agent.webserver = val;
-      }
+      // function updatewebserver(val) {
+      //   GLANCE.Agent.webserver = val;
+      // }
 
       function updatepartneruserid(val) {
         partnerUserId = val;
@@ -480,12 +483,7 @@
       <div id="auth-box">
         <div id="webserver-box" class="credential">
           <label for="ok-timeout-button">webserver </label>
-          <input
-            type="text"
-            style="width: 250px"
-            id="webserver"
-            oninput="updatewebserver($(this).val())"
-          />
+          <input type="text" style="width: 250px" id="webserver" />
         </div>
         <div id="partnerid-box" class="credential">
           <label for="ok-timeout-button">partnerid </label>
